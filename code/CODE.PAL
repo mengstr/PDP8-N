@@ -1,0 +1,263 @@
+/
+/ ./pal -r CODE.PAL && ../chkoverlap/a.out -d CODE.rim
+/
+
+*0
+	.-.		            / Interrupt return address
+    IAC
+    JMP I iCont
+
+*50
+    NOP
+    JMP I 50
+
+iCont,  cont
+
+*0200
+    JMS 50
+    06007                / CAF
+    CLA CLL IAC         / loads 0001 (1 decimal)
+    06040                 / SPF Set printer flag
+    ION
+    CLA CLL IAC RTL     / loads 0004 (4 decimal)
+    CLA IAC BSW         / loads 0100 (64 decimal)
+cont,
+    NOP
+    HLT
+    
+
+
+/
+/ Do some interrupt-based output.
+/CAF=6007
+/
+/	*0
+/	.-.		/ Interrupt return address
+/	JMP INTSRV	/ Go to interrupt service routine
+/
+/	*20
+/AC,	.-.
+/L,	.-.
+/CHAR,	.-.
+/KEYFLG, 0
+/PRTFLG,	0
+/
+/	*100
+/START,	CAF
+/	ION		/ Interrupts on
+/	JMP I .+1
+/	MSGLP
+/MSGLP,	TAD KEYFLG	/ Wait for a character
+/	SMA CLA
+/	JMP MSGLP
+/	DCA KEYFLG	/ Clear software flag
+/	DCA PRTFLG	/ Clear printer flag
+/	TAD CHAR	/ Get character
+/	TLS		/ Print the character
+/	CLA
+/	TAD PRTFLG	/ Wait for printer interrupt
+/	SMA CLA
+/	JMP .-2
+/	CLA
+/	JMP MSGLP
+/INTSRV,	DCA AC		/ Save AC and L
+/	RAL
+/	DCA L
+/	KSF		/ Copy Keyboard flag to KEYFLG
+/	JMP KEYOK
+/	KRB		/ Save Keyboard character
+/	DCA CHAR
+/	CMA
+/KEYOK,	DCA KEYFLG
+/	TSF		/ Copy Printer flag to PRTFLG
+/	JMP PRTOK
+/	TCF		/ Clear Printer flag to prevent re-interrupt.
+/	CMA
+/PRTOK,	DCA PRTFLG
+/	TAD L		/ Restore L, then AC
+/	CLL RAR
+/	TAD AC
+/	ION		/ Re-enable interrupts
+/	JMP I 0		/ Return to user mode
+/
+/	*200
+/    JMP I iSTART
+/iStart, START
+/
+//*01
+//    055 // acc=61
+//    020 // acc=26
+//*010
+//    066 // acc=72
+//    021 // acc=50
+//
+//*020
+//    022 //
+/    033 //
+/    044 //
+/
+/*0200
+/    CLA CLL IAC RTL     / loads 0004 (4 decimal)
+/    TAD 1
+/    CLA CLL IAC RTL     / loads 0004 (4 decimal)
+/    TAD 10
+/    CLA CLL IAC RTL     / loads 0004 (4 decimal)
+/    TAD i 2
+/    CLA CLL IAC RTL     / loads 0004 (4 decimal)
+/    TAD i 11
+/    HLT
+/
+/
+/    ISZ 1
+/    ISZ 10
+/    ISZ i 2
+/    ISZ i 11
+/    HLT
+/
+/    JMP REPT3
+/    JMP ASCII
+/    CLA
+/    JMS J1T
+/    NOP
+/    JMS i J2I
+/    HLT
+/J2I, J2T
+/
+/*0310
+/J1T, 0
+/    CMA
+/    JMP I J1T
+/
+/*0320
+/J2T, 0
+/    CMA
+/    JMP I J2T
+/
+/*0330
+/ASCII,
+/        CLA	        / INIT CHAR
+/qL1,	TLS	        / PRINT CHAR
+/qL2,	TSF	        / WAIT UNTIL PRINTED
+/        JMP qL2	    / SPIN
+/	    IAC	        / INCRE CHAR
+/	    JMP qL1	    / LOOP
+/
+//
+// Echo received character three times
+//
+/REPT3,
+/        SKP
+/        NOP
+/        KCC	        / CLEAR FLAG
+/L1,	    KSF	        / SKIP IF CHAR
+/        JMP L1	    / SPIN
+/	    KRB	        / READ CHAR
+/	    TLS	        / PRINT CHAR
+/L2a,	TSF	        / WAIT UNTIL PRINTED
+/        JMP L2a	    / SPIN
+/	    TLS	        / PRINT CHAR
+/L2b,	TSF	        / WAIT UNTIL PRINTED
+/        JMP L2b	    / SPIN
+/	    TLS	        / PRINT CHAR
+/L2c,	TSF	        / WAIT UNTIL PRINTED
+/        JMP L2c	    / SPIN
+/	    JMP L1	    / LOOP
+/
+//*0
+//    CLA CLL CML RTR     / loads 2000 (1024 decimal)
+//    JMP 020
+//
+//    01
+//    010
+//    0100
+//    02
+//    020
+/    0200
+/
+/*020
+/    CLA OSR
+/    DCA 077
+/    CLA CLL CMA RTL     / loads 7775 (-3 decimal)
+/    DCA 076
+/xy,
+/    ISZ 076
+/    JMP xy
+/
+/    TAD 2
+/    TAD 3
+/    TAD 4
+/    TAD i 70
+/    TAD i 71
+/    TAD i 72
+/    DCA i 073
+/    
+/loop,
+/    TAD 2
+/    SZA
+/    JMP loop
+/    HLT
+/
+/*070 
+/    5
+/    6
+/    7
+/    077
+/
+/   
+/    DCA 040
+/    SKP
+/    JMP 02
+/    CLA CLL CMA RAR / loads 03777 (2047 decimal)
+/    HLT
+/
+/
+/    JMP 020
+/
+/*020
+/    CLA CLL
+/    JMS 030
+/    CLA CLL
+/
+/*030
+/    0
+/    CLA IAC BSW         / loads 0100 (64 decimal)
+/    JMP I 030
+/
+/*050
+/    SMA /- skip on AC < 0 (or group)
+/    SZA /- skip on AC = 0 (or group)
+/    SNL /- skip on L /= 0 (or group)
+/    SKP /- skip unconditionally
+/    SPA /- skip on AC >= 0 (and group)
+/    SNA /- skip on AC /= 0 (and group)
+/    SZL /- skip on L = 0 (and group)
+/    CLA /- clear AC
+/    OSR /- logically 'or' front-panel switches with AC
+/    HLT /- halt
+/
+/
+/*0100 
+/    05071
+/*0101 
+/    03333
+/
+
+/ CLA CLL             / loads 0000 (0 decimal)
+/ CLA CLL IAC         / loads 0001 (1 decimal)
+/ CLA CLL IAC RAL     / loads 0002 (2 decimal)
+/ CLA CLL CML RTL     / loads 0002 (2 decimal)
+/ CLA CLL CML IAC RAL / loads 0003 (3 decimal)
+/ CLA CLL IAC RTL     / loads 0004 (4 decimal)
+/ CLA CLL CML IAC RTL / loads 0006 (6 decimal)
+/ CLA IAC BSW         / loads 0100 (64 decimal)
+/ CLA CLL CML RTR     / loads 2000 (1024 decimal)
+/ CLA CLL CMA RAR     / loads 3777 (2047 decimal)
+/ CLA CLL CML RAR     / loads 4000 (-2048 decimal.  See Note 1, below)
+/ CLA CLL CMA RTR     / loads 5777 (-1025 decimal)
+/ CLA CLL CML IAC RTL / loads 6000 (-1024 decimal)
+/ CLA CLL CMA RTL     / loads 7775 (-3 decimal)
+/ CLA CLL CMA RAL     / loads 7776 (-2 decimal)
+/ CLA CLL CMA         / loads 7777 (-1 decimal)
+
+/
+$

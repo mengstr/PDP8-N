@@ -1,0 +1,40 @@
+//
+//  APA
+// 
+{ "signal": [
+["Normal",
+{ "name": "enRAMtoDBUS",        "wave": "01........." },
+{ "name": "enINSTRtoABUS",      "wave": "010........" },
+{ "name": "enALUtoACC",         "wave": "0..1......." },
+{ "name": "enALUand",           "wave": "0..1......." },
+{ "name": "ckACC",              "wave": "0...1......" }
+],
+{},{},
+["Indirect",
+{ "name": "enRAMtoDBUS",        "wave": "01........." },
+{ "name": "enINSTRtoABUS",      "wave": "010........" },
+{ "name": "enINSTRtoABUS",      "wave": "01........." },
+{ "name": "enDBUStoABUS",       "wave": "0.1........" },
+{ "name": "ckDBUStoABUS",       "wave": "0.1........" },
+{ "name": "enALUtoACC",         "wave": "0..1......." },
+{ "name": "enALU{and,tad}",     "wave": "0..1......." },
+{ "name": "ckACC",              "wave": "0...1......" }
+  ],
+// { "name": "D1",         "wave": "01........." },
+// { "name": "P1",         "wave": "010........" },
+// { "name": "D2",         "wave": "0.1........" },
+// { "name": "P2",         "wave": "0.10......." },
+// { "name": "D3",         "wave": "0..1......." },
+// { "name": "P3",         "wave": "0..10......" },
+// { "name": "D4",         "wave": "0...1......" },
+// { "name": "P4",         "wave": "0...10....." },
+// { "name": "D5",         "wave": "0....1....." },
+// { "name": "P5",         "wave": "0....10...." },
+// { "name": "D6",         "wave": "0.....1...." },
+// { "name": "P6",         "wave": "0.....10..." },
+// { "name": "D7",         "wave": "0......10.." },
+// { "name": "P7",         "wave": "0......1..." },
+// { "name": "D8",         "wave": "0.......10." },
+// { "name": "P8",         "wave": "0.......1.." },
+]}
+  
